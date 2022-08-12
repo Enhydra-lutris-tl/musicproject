@@ -42,6 +42,12 @@ export default {
       this.$refs.list[index].style.left = boxLeft + 'px'
     },
     iconSpin(index){
+      //选中后的样式改变
+      this.$refs.list[index].style.background = '#5FFBF1'
+      this.$refs.list[index].style.boxShadow = '0 0 0 0 rgba(95,251,241,0.5)'
+     setTimeout(()=>{
+       this.$refs.list[index].style.background = 'transparent'
+      },500)
       // 音符图标转圈逻辑
       this.$refs.list[index].firstChild.style.transition = '0.5s'
       this.$refs.list[index].firstChild.classList.add('iconSpin')
@@ -104,20 +110,14 @@ export default {
   line-height: 80px;
   transition: 0.5s;
 }
-.list:hover{
-  background: #00a882;
-  box-shadow: 0 0 0 0 rgba(64, 198, 128, 0.95);
-}
-.list:hover .iconfont{
-  font-size: 40px;
-}
+
 .list,
 .list:before,
 .list:after{
   border-radius: 50%;
   background: transparent;
   animation: 3s shadowShow infinite var(--s,0s);
-  box-shadow: 0 0 0 0 rgba(108, 108, 108, 0.71);
+  box-shadow: 0 0 0 0 rgba(108, 108, 108, 0.5);
 }
 .list:before,
 .list:after{
