@@ -1,15 +1,14 @@
 <template>
-<div>
-  <ul class="listBox">
-    <li class="list1" @click="musicPlay()">
-      <audio :src="music[0]" ref="list1"></audio></li>
-    <li class="list2" @click="musicPlay()">
-      <audio :src="music[1]"></audio></li>
-    <li class="list3" @click="musicPlay()">
-      <audio :src="music[2]"></audio></li>
-    <li class="list4" @click="musicPlay()">
-      <audio :src="music[3]"></audio></li>
-  </ul>
+<div class="back">
+  <div
+      v-for="(a,index) in 5"
+      :key="index"
+      class="list"
+      @click="musicPlay(index)"
+      ref="list"
+  >
+    <i class="iconfont icon-icon-test"></i>
+  </div>
 </div>
 </template>
 
@@ -27,49 +26,120 @@ export default {
           require('@/assets/music/6.mp3'),
           require('@/assets/music/7.mp3'),
           require('@/assets/music/8.mp3'),
+          require('@/assets/music/502339.mp3'),
       ]
     }
   },
   methods:{
-    musicPlay(){
-        this.$refs.list1.play()
-        setTimeout(()=>{
-          var a = Math.floor(Math.random()*8)
-          this.$refs.list1.src = this.music[a]
-        },1000)
+    boxCoord(index){
+      // 获取窗口高宽
+      const bodyHeight = document.documentElement.clientHeight
+      const bodyWidth = document.documentElement.clientWidth
+      // 随机元素位置
+      var boxTop = Math.floor(Math.random()*bodyHeight)
+      var boxLeft = Math.floor(Math.random()*bodyWidth)
+      this.$refs.list[index].style.top = boxTop + 'px'
+      this.$refs.list[index].style.left = boxLeft + 'px'
+    },
+    iconSpin(index){
+      // 音符图标转圈逻辑
+      this.$refs.list[index].firstChild.style.transition = '0.5s'
+      this.$refs.list[index].firstChild.classList.add('iconSpin')
+      setTimeout(()=>{
+        this.$refs.list[index].firstChild.style.transition = '0s'
+
+        this.$refs.list[index].firstChild.classList.remove('iconSpin')
+      },500)
+    },
+    musicPlay(index){
+      //随机读取一个音效
+      var musicSrc = Math.floor(Math.random()*9)
+      new Audio(this.music[musicSrc]).play()
+      this.boxCoord(index)
+      this.iconSpin(index)
+    }
+  },
+  mounted() {
+    setTimeout(()=>{
+      // 随机元素位置
+      for (let e = 0; e < this.$refs.list.length; e++) {
+        this.boxCoord(e)
+      }
+    },300)
+    document.onkeydown = ()=>{
+      if (window.event.keyCode === 32){
+        let domIndex = Math.floor(Math.random()*5)
+        this.musicPlay(domIndex)
+      }
+    }
+    document.onclick = ()=>{
+        let domIndex = Math.floor(Math.random()*5)
+        this.musicPlay(domIndex)
     }
   }
 }
 </script>
 
 <style scoped>
-.listBox{
+.back{
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-image: linear-gradient(to left top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
+}
+.list{
   position: absolute;
-  height: 400px;
-  width: 400px;
-  top: calc(50% - 200px);
-  left: calc(50% - 200px) ;
+  height: 80px;
+  width: 80px;
+  top: calc(50% - 40px);
+  left: calc(50% - 40px);
+  transition: 0.5s;
 }
-.listBox li{
+.iconfont{
+  display: block;
   position: absolute;
-  height: 40px;
-  width: 40px;
-  background: aquamarine;
-  list-style: none;
-  transform: rotate(45deg);
+  height: 100%;
+  width: 100%;
+  font-size: 50px;
+  line-height: 80px;
+  transition: 0.5s;
 }
-.list1{
-  left: calc(50% - 20px);
+.list:hover{
+  background: #00a882;
+  box-shadow: 0 0 0 0 rgba(64, 198, 128, 0.95);
 }
-.list2{
-  top: calc(50% - 20px);
-  right: 0;
+.list:hover .iconfont{
+  font-size: 40px;
 }
-.list3{
-  left: calc(50% - 20px);
-  bottom: 0;
+.list,
+.list:before,
+.list:after{
+  border-radius: 50%;
+  background: transparent;
+  animation: 3s shadowShow infinite var(--s,0s);
+  box-shadow: 0 0 0 0 rgba(108, 108, 108, 0.71);
 }
-.list4{
-  top: calc(50% - 20px);
+.list:before,
+.list:after{
+  content: '';
+  position: absolute;
+  left: 0;
+  height: 100%;
+  width: 100%;
+
+}
+.list:before{
+  --s:.5s
+}
+.list:after{
+  --s:1s
+}
+@keyframes shadowShow{
+  to {
+    box-shadow: 0 0 0 60px transparent;
+  }
+}
+.iconSpin {
+    transform: rotate(360deg);
 }
 </style>
