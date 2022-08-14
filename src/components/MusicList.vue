@@ -154,6 +154,7 @@ export default {
     }
   },
   mounted() {
+    this.musicSize()
     this.drawBack(this.canvasSize["width"],this.canvasSize["height"])
     setTimeout(()=>{
       // 随机元素位置
