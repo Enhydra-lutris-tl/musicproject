@@ -38,6 +38,16 @@ export default {
       // 随机元素位置
       var boxTop = Math.floor(Math.random()*bodyHeight)
       var boxLeft = Math.floor(Math.random()*bodyWidth)
+      if (boxTop <= 80){
+        boxTop = 80
+      }else if(bodyHeight - boxTop <= 80 ){
+        boxTop = bodyHeight - 80
+      }
+      if (boxLeft <= 80){
+        boxLeft = 80
+      }else if(bodyWidth - boxLeft <= 80 ){
+        boxLeft = bodyWidth - 80
+      }
       this.$refs.list[index].style.top = boxTop + 'px'
       this.$refs.list[index].style.left = boxLeft + 'px'
     },
