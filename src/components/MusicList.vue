@@ -3,6 +3,7 @@
 
   <canvas
       id="canvasBack"
+      @click="musicClicked"
   ></canvas>
   <div
       v-for="(a,index) in 5"
@@ -13,6 +14,7 @@
   >
     <i class="iconfont icon-icon-test"></i>
   </div>
+  <div class="musicClick" v-show="mobileShow" @click="musicClicked">点！点！点！</div>
 </div>
 </template>
 
@@ -21,6 +23,7 @@ export default {
   name: "MusicList",
   data(){
     return{
+      mobileShow:false,
       music:[
         require('@/assets/music/a-.mp3'),
         require('@/assets/music/b-.mp3'),
@@ -60,6 +63,10 @@ export default {
     }
   },
   methods:{
+    // 随机选择一个音符
+    musicRange(){
+      return Math.floor(Math.random()*5)
+    },
     // 调整画布尺寸
     drawBack(cx,cy){
       var canvas = document.getElementById('canvasBack')
@@ -77,14 +84,17 @@ export default {
       this.canvasColor = `rgba(${a[0] - 30},${a[1] - 20},${a[2] - 20},${a[3]})`
       console.log(this.canvasColor)
     },
+
     // 获取窗口高宽
-    boxCoord(index){
-      const bodyHeight = document.documentElement.clientHeight
+    musicSize(){
+      // const bodyHeight = document.documentElement.clientHeight
       const bodyWidth = document.documentElement.clientWidth
       if (bodyWidth <= 428){
         this.iconSize = 40
+        this.mobileShow = true
       }else {
         this.iconSize = 80
+        this.mobileShow = false
       }
       //音符大小修改
       for (let list = 0; list < this.$refs.list.length; list++){
@@ -92,6 +102,10 @@ export default {
         this.$refs.list[list].style.height = this.iconSize + 'px'
         this.$refs.list[list].style.lineHeight = this.iconSize + 'px'
       }
+    },
+    boxCoord(index){
+      const bodyHeight = document.documentElement.clientHeight
+      const bodyWidth = document.documentElement.clientWidth
       // 随机音符元素位置
       var boxTop = Math.floor(Math.random()*bodyHeight)
       var boxLeft = Math.floor(Math.random()*bodyWidth)
@@ -133,6 +147,10 @@ export default {
       new Audio(this.music[musicSrc]).play()
       this.boxCoord(index)
       this.iconSpin(index)
+    },
+    //点击触发
+    musicClicked(){
+      this.musicPlay(this.musicRange())
     }
   },
   mounted() {
@@ -145,15 +163,11 @@ export default {
     },300)
     document.onkeydown = ()=>{
       if (window.event.keyCode === 32){
-        let domIndex = Math.floor(Math.random()*5)
-        this.musicPlay(domIndex)
+        this.musicPlay(this.musicRange())
       }
     }
-    document.onclick = ()=>{
-        let domIndex = Math.floor(Math.random()*5)
-        this.musicPlay(domIndex)
-    }
     window.onresize = () =>{
+      this.musicSize()
       this.drawBack(this.canvasSize["width"],this.canvasSize["height"])
     }
   }
@@ -215,5 +229,18 @@ export default {
 }
 .iconSpin {
     transform: rotate(360deg);
+}
+.musicClick{
+  position: absolute;
+  bottom: 5px;
+  left: calc(50% - 120px);
+  width: 240px;
+  height: 50px;
+  line-height: 50px;
+  font-size: 28px;
+  font-weight: bold;
+  background: #ff876c;
+  border-radius: 8px;
+  transition: 0.3s;
 }
 </style>
