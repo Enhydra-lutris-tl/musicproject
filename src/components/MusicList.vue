@@ -1,24 +1,37 @@
 <template>
 <div class="back">
 
-  <canvas
-      id="canvasBack"
-      @click="musicClicked"
-  ></canvas>
-  <div class="tipsTitleBox" v-show="!mobileShow">
-    <span>键盘A,高音</span>
-    <span>键盘W,中音</span>
-    <span>键盘D,低音</span>
-    <span>键盘空格,变音</span>
+  <canvas id="canvasBack"></canvas>
+  <div class="dateList">
+    <div class="nowTime">{{nowDate['nowTime']}}</div>
+    <div class="nowDate">{{nowDate['nowDate']}}</div>
+  </div>
+  <div class="text" :style="{color:textColor}">{{text}}</div>
+
+  <div class="tipsTitleBox" v-show="tipShow">
+    <span>点左上,高音</span>
+    <span>点右上,中音</span>
+    <span>点左下,低音</span>
+    <span>点右下,变音</span>
+  </div>
+  <div class="mouseClick ClickLeftTop" @click="musicClicked(3)"></div>
+  <div class="mouseClick ClickRightTop" @click="musicClicked(2)"></div>
+  <div class="mouseClick ClickLeftBottom" @click="musicClicked(1)"></div>
+  <div class="mouseClick ClickRightBottom" @click="musicClicked(4)"></div>
+
+  <div class="mouseTipsBox" v-show="tipShow">
+    <div class="mouseTips tipsLeftTop" @click="musicClicked(3)"></div>
+    <div class="mouseTips tipsRightTop" @click="musicClicked(2)"></div>
+    <div class="mouseTips tipsLeftBottom" @click="musicClicked(1)"></div>
+    <div class="mouseTips tipsRightBottom" @click="musicClicked(4)"></div>
   </div>
   <div
-      v-for="(a,index) in 5"
-      :key="index"
+      v-for="a in iconNumber"
+      :key="a"
       class="list"
-      @click="musicPlay(index)"
       ref="list"
   >
-    <i class="iconfont icon-icon-test" ref="iconfont"></i>
+    <i class="iconfont icon-music" ref="iconfont"></i>
   </div>
   <div class="musicClickLow" v-show="mobileShow" @click="musicClicked(1)">低</div>
   <div class="musicClickMiddle" v-show="mobileShow" @click="musicClicked(2)">中</div>
@@ -32,6 +45,8 @@ export default {
   name: "MusicList",
   data(){
     return{
+      tipShow:false,
+      nowDate: {nowTime:'',nowDate:''},
       mobileShow:false,
       highPitch:[
         'bigCharacterTwo',
@@ -142,12 +157,15 @@ export default {
       iconSize:{icon:80,music:50},
       canvasSize:{width:'',height:''},
       canvasColor:'rgba(108,234,232)',
+      text:'new Text|一段文本',
+      textColor:'rgba(0,0,0,0.5)',
+      iconNumber:[0,1,2,3,4],
     }
   },
   methods:{
     // 随机选择一个音符
     musicRange(){
-      return Math.floor(Math.random()*5)
+      return Math.floor(Math.random()*this.iconNumber.length)
     },
     // 调整画布尺寸
     drawBack(cx,cy){
@@ -202,17 +220,17 @@ export default {
           boxTop = bodyHeight - 210
         }
       }else {
-        if(bodyHeight - boxTop <= 80 ){
-          boxTop = bodyHeight - 80
+        if(bodyHeight - boxTop <= 120 ){
+          boxTop = bodyHeight - 120
         }
       }
-      if (boxTop <= 80){
-          boxTop = 80
+      if (boxTop <= 120){
+          boxTop = 120
       }
-      if (boxLeft <= 80){
-        boxLeft = 80
-      }else if(bodyWidth - boxLeft <= 80 ){
-        boxLeft = bodyWidth - 80
+      if (boxLeft <= 120){
+        boxLeft = 120
+      }else if(bodyWidth - boxLeft <= 120 ){
+        boxLeft = bodyWidth - 120
       }
       this.drawBack(boxLeft,boxTop)
       this.$refs.list[index].style.top = boxTop + 'px'
@@ -264,7 +282,14 @@ export default {
       this.musicPlay(this.musicRange(),musicKindred)
     }
   },
+
+
+
   mounted() {
+    setInterval(()=>{
+      this.nowDate["nowTime"] = new Date().toLocaleTimeString()
+      this.nowDate["nowDate"] = new Date().toLocaleDateString()
+    },1000)
     this.musicSize()
     this.drawBack(this.canvasSize["width"],this.canvasSize["height"])
     setTimeout(()=>{
@@ -287,6 +312,40 @@ export default {
     window.onresize = () =>{
       this.musicSize()
       this.drawBack(this.canvasSize["width"],this.canvasSize["height"])
+    }
+
+    //壁纸相关
+    window.wallpaperPropertyListener = {
+        applyUserProperties: (properties) =>{
+          //获取输入的文本
+          if (properties.newtext) {
+             this.text = properties.newtext.value
+          }
+          // 获取文本颜色
+          if (properties.newtextcolor) {
+            var newtextcolors = properties.newtextcolor.value.split(' ')
+            newtextcolors = newtextcolors.map(function (c) {
+              return Math.ceil(c*255)
+            })
+            this.textColor = `rgb(${newtextcolors})`
+          }
+            //选择音符数量
+          if (properties.newiconnumber) {
+            if (this.iconNumber.length < properties.newiconnumber.value){
+              // 差值
+              let a = properties.newiconnumber.value - this.iconNumber.length
+              for (let b = 0; b < a; b++){
+                this.iconNumber.push(this.iconNumber.length)
+              }
+            }else if (this.iconNumber.length > properties.newiconnumber.value){
+              this.iconNumber = this.iconNumber.filter(a=>a < properties.newiconnumber.value)
+            }
+          }
+          //互动提示开关
+          if (properties.newtipchecked) {
+            this.tipShow = properties.newtipchecked.value
+          }
+        },
     }
   }
 }
@@ -383,11 +442,103 @@ export default {
   justify-content: center;
   width: 100%;
   position: absolute;
-  bottom: 30px;
+  top: 30px;
   font-size: 26px;
-  color: rgba(0, 0, 0, 0.61);
+  color: rgba(0, 0, 0, 0.1);
 }
 .tipsTitleBox span{
   margin: 0 15px 0 15px;
+}
+.mouseClick{
+  position: absolute;
+  height: 50%;
+  width: 50%;
+  background: transparent;
+  font-size: 120px;
+  font-weight: bold;
+  line-height: 400px;
+  color: rgba(0, 0, 0, 0.05);
+  z-index: 1;
+}
+.ClickLeftTop{
+  top: 0;
+  left: 0;
+}
+.ClickRightTop{
+  top: 0;
+  right: 0;
+}
+.ClickRightBottom{
+  bottom: 0;
+  right: 0;
+}
+.ClickLeftBottom{
+  bottom: 0;
+  left: 0;
+}
+.dateList{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 2;
+  top: 80px;
+  left: calc(50% - 250px);
+  height: 120px;
+  width: 500px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.87);
+}
+.nowTime{
+  margin-top: 15px;
+  font-size: 60px;
+  font-weight: bold;
+
+}
+.nowDate{
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+.text{
+  position: absolute;
+  top: calc(50% - 25px);
+  left: calc(50% - 600px);
+  height: 50px;
+  line-height: 50px;
+  width: 1200px;
+  border: rgba(0, 0, 0, 0.3) solid 2px;
+  border-radius: 8px;
+
+}
+.mouseTips{
+  position: absolute;
+  height: 30px;
+  width: 30px;
+  box-sizing: border-box;
+}
+.tipsLeftTop{
+  top: calc(50% - 30px);
+  left: calc(50% - 30px);
+  border-right: rgba(0, 0, 0, 0.1) solid 1px;
+  border-bottom: rgba(0, 0, 0, 0.1) solid 1px;
+}
+.tipsRightTop{
+  top: calc(50% - 30px);
+  right: calc(50% - 30px);
+  border-bottom: rgba(0, 0, 0, 0.1) solid 1px;
+  border-left: rgba(0, 0, 0, 0.1) solid 1px;
+}
+.tipsLeftBottom{
+  bottom: calc(50% - 30px);
+  left: calc(50% - 30px);
+  border-top: rgba(0, 0, 0, 0.1) solid 1px;
+  border-right: rgba(0, 0, 0, 0.1) solid 1px;
+}
+.tipsRightBottom{
+  bottom: calc(50% - 30px);
+  right: calc(50% - 30px);
+  border-left: rgba(0, 0, 0, 0.1) solid 1px;
+  border-top: rgba(0, 0, 0, 0.1) solid 1px;
 }
 </style>

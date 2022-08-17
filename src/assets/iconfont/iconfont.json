@@ -1,0 +1,16 @@
+{
+  "id": "3594055",
+  "name": "music",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "音乐项目相关",
+  "glyphs": [
+    {
+      "icon_id": "7141644",
+      "name": "music",
+      "font_class": "music",
+      "unicode": "e62b",
+      "unicode_decimal": 58923
+    }
+  ]
+}
