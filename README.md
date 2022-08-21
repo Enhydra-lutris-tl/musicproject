@@ -1,24 +1,20 @@
-# musicproject
+# 随意音符
 
-## Project setup
+### 音效功能
 ```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
+单击屏幕左上、左下、右上、右下四个位置触发钢琴高、中、低、变四种音效（音效中随机一种）
 ```
 
-### Compiles and minifies for production
+### 看板功能
 ```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
+可在设置中填写一段话，展示在屏幕正中
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### my Todo功能
+```
+1. 一个简单的todo功能
+2. 增加、删除、完成
+3. 未完成总是显示在最上方
+4. 右上角图标点击可收起
+```
+

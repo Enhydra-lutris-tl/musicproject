@@ -374,6 +374,7 @@ export default {
   width: 100%;
   font-size: 50px;
   transition: 0.5s;
+  color: rgb(52, 52, 52);
 }
 
 .list,
@@ -503,10 +504,10 @@ export default {
 .text{
   position: absolute;
   top: calc(50% - 25px);
-  left: calc(50% - 600px);
+  left: calc(50% - 500px);
   height: 50px;
   line-height: 50px;
-  width: 1200px;
+  width: 1000px;
   border: rgba(0, 0, 0, 0.3) solid 2px;
   border-radius: 8px;
 
