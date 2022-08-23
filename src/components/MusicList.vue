@@ -1,6 +1,10 @@
 <template>
 <div class="back">
-
+  <input type="file" @change="imgInput" ref="imageInput" class="imageInput">
+  <div class="imageInputButton"  ref="imageInputButton">
+    <div class="newImageDelete" ref="newImageDelete" @click="newImageDeleted">清除背景</div>
+    <i class="iconfont icon-icon-test2" @click="toImgInput"></i><span @click="toImgInput">修改背景</span></div>
+  <img :src="imgSrc" alt="111111" id="img" ref="backImg" v-show="imgSrc" :style="{top:imgHeight*(topNumber/100)*-1 + 'px'}">
   <canvas id="canvasBack"></canvas>
   <div class="dateList">
     <div class="nowTime">{{nowDate['nowTime']}}</div>
@@ -26,25 +30,52 @@
     <div class="mouseTips tipsRightBottom" @click="musicClicked(4)"></div>
   </div>
   <div
+      v-show="iconNumber"
       v-for="a in iconNumber"
       :key="a"
       class="list"
       ref="list"
   >
-    <i class="iconfont icon-music" ref="iconfont"></i>
+    <i class="iconfont icon-music musicIcon" ref="iconfont"></i>
   </div>
   <div class="musicClickLow" v-show="mobileShow" @click="musicClicked(1)">低</div>
   <div class="musicClickMiddle" v-show="mobileShow" @click="musicClicked(2)">中</div>
   <div class="musicClickHeight" v-show="mobileShow" @click="musicClicked(3)">高</div>
   <div class="musicClickChange" v-show="mobileShow" @click="musicClicked(4)">变</div>
+<!--  todo相关-->
+  <div class="todoBox" ref="todoBox">
+  <i class="iconfont icon-icon-test1 todoCardChecked" @click="todoCardChecked" ref="iconfont"></i>
+  <div class="todoListBox">
+      <div class="todoTitleText">My Todo</div>
+    <div class="operateBox">
+      <div>{{myTodo.todo}}</div>
+      <div class="buttonBox">
+        <button type="button" @click="newTodo">添加</button>
+        <button type="button" @click="clearData">重置</button>
+      </div>
+    </div>
+
+    <ul>
+      <li class="todoLiBox" v-for="todoList in todoListP" :key="todoList.id">
+        <div class="todoCheckedBox" @click="todoChecked(todoList.id)" ref="todoCheckedBox"></div>
+        <div class="todoText">{{todoList.todo}}</div>
+        <div class="todoDelete" @click="todoDelete(todoList.id)">删除</div>
+      </li>
+    </ul>
+  </div>
+</div>
 </div>
 </template>
 
 <script>
+import {computed, reactive, ref} from "vue";
+
 export default {
   name: "MusicList",
   data(){
     return{
+      topNumber:1,
+      imgHeight:'',
       tipShow:false,
       nowDate: {nowTime:'',nowDate:''},
       mobileShow:false,
@@ -160,9 +191,126 @@ export default {
       text:'new Text|一段文本',
       textColor:'rgba(0,0,0,0.5)',
       iconNumber:[0,1,2,3,4],
+      imgSrc:localStorage.getItem('newImage'),
+      imgRatio:''
+    }
+  },
+  setup(){
+    const todoCheckedBox = ref()
+    const todoBox = ref()
+    const iconfont =ref()
+    const imageInputButton = ref()
+    const newImageDelete = ref()
+
+    let myTodo = reactive({
+      id:'',
+      checked:false,
+      todo:'设置页面输入文本'
+    })
+    if (!localStorage.getItem('todoList')){
+      let list = []
+      localStorage.setItem('todoList',JSON.stringify(list))
+    }
+    let todoList = reactive({
+      list:JSON.parse(localStorage.getItem('todoList')),
+      cardChecked:true
+    })
+    //todolist排序
+    let todoListP = computed(()=>{
+      let todoListP1 = JSON.parse(JSON.stringify(todoList.list))
+      return todoListP1.sort(function (a){
+        return a.checked ? 1:-1
+      })
+    })
+
+
+    // 卡片展开和收起
+    function todoCardChecked(){
+      todoList.cardChecked = !todoList.cardChecked
+      iconfont.value.classList.remove('icon-icon-test')
+      iconfont.value.classList.remove('icon-icon-test1')
+      if (todoList.cardChecked === false){
+        todoBox.value.classList.add('rotate')
+        iconfont.value.classList.add('icon-icon-test')
+        iconfont.value.classList.add('iconRotate')
+        imageInputButton.value.style.right = '-90px'
+        newImageDelete.value.style.top = '0'
+        newImageDelete.value.style.color = 'transparent'
+      }else if (todoList.cardChecked === true){
+        todoBox.value.classList.remove('rotate')
+        iconfont.value.classList.add('icon-icon-test1')
+        iconfont.value.classList.remove('iconRotate')
+        imageInputButton.value.style.right = '30px'
+        newImageDelete.value.style.top = '-31px'
+        newImageDelete.value.style.color = 'rgba(255, 255, 255, 0.5)'
+      }
+    }
+    // 添加todo
+    function newTodo(){
+      myTodo.id = JSON.stringify(Math.random()*Math.random()*100)
+      todoList.list.push(JSON.parse(JSON.stringify(myTodo)))
+      myTodo.id = ''
+      myTodo.todo = '设置页面输入文本'
+      localStorage.setItem('todoList',JSON.stringify(todoList.list))
+
+    }
+
+    // 清除所有todo
+    function clearData(){
+      todoList.list.length = 0
+      localStorage.setItem('todoList',JSON.stringify(todoList.list))
+
+    }
+    //删除一个todo
+    function todoDelete(id){
+      todoList.list = todoList.list.filter(a=>a.id !== id)
+      localStorage.setItem('todoList',JSON.stringify(todoList.list))
+
+    }
+    //完成todo并改变提示圆颜色
+    function todoChecked(id){
+      for (let a = 0; a < todoList.list.length; a++){
+        if (todoList.list[a].id === id){
+          todoList.list[a].checked = !todoList.list[a].checked
+          todoCheckedBox.value[a].style.background = todoList.list[a].checked? 'rgba(44,134,138,0.5)':'rgba(255, 255, 255, 0.6)'
+        }
+      }
+    }
+    return{
+      todoList,
+      myTodo,
+      todoCheckedBox,
+      todoListP,
+      todoBox,
+      iconfont,
+      imageInputButton,
+      newImageDelete,
+      newTodo,
+      clearData,
+      todoDelete,
+      todoChecked,
+      todoCardChecked
     }
   },
   methods:{
+    toImgInput(){
+      this.$refs.imageInput.click()
+    },
+    imgInput(){
+      const file = this.$refs.imageInput.files[0]
+      const fr = new FileReader()
+      fr.onload = (e) => {
+        this.imgSrc = e.target.result
+        console.log(this.imgSrc)
+        localStorage.setItem('newImage',this.imgSrc)
+        this.imgWidthToHeight()
+      }
+      fr.readAsDataURL(file)
+    },
+    newImageDeleted(){
+      localStorage.setItem('newImage','')
+      this.imgSrc = localStorage.getItem('newImage')
+    },
     // 随机选择一个音符
     musicRange(){
       return Math.floor(Math.random()*this.iconNumber.length)
@@ -172,6 +320,9 @@ export default {
       var canvas = document.getElementById('canvasBack')
       canvas.height = document.documentElement.clientHeight
       canvas.width = document.documentElement.clientWidth
+      this.$refs.backImg.width = canvas.width
+      this.$refs.backImg.height = canvas.width*this.imgRatio
+      this.imgHeight = canvas.width*this.imgRatio - canvas.height
       var ctx = canvas.getContext('2d')
       // 清除画布内容，防止拉伸
       ctx.clearRect(0,0,canvas.width,canvas.height)
@@ -280,12 +431,23 @@ export default {
     //点击触发
     musicClicked(musicKindred){
       this.musicPlay(this.musicRange(),musicKindred)
+    },
+    // 获取图片宽高比
+    imgWidthToHeight(){
+      const img = new Image()
+      img.src = this.imgSrc
+      img.onload = ()=>{
+        this.imgRatio = img.height/img.width
+        this.$refs.backImg.height = document.documentElement.clientWidth * this.imgRatio
+      }
     }
   },
 
-
-
   mounted() {
+    if (!localStorage.getItem('newImage')){
+      localStorage.setItem('newImage','')
+    }
+    this.imgWidthToHeight()
     setInterval(()=>{
       this.nowDate["nowTime"] = new Date().toLocaleTimeString()
       this.nowDate["nowDate"] = new Date().toLocaleDateString()
@@ -345,6 +507,14 @@ export default {
           if (properties.newtipchecked) {
             this.tipShow = properties.newtipchecked.value
           }
+          //todo文本
+          if (properties.newtodo){
+            this.myTodo.todo = properties.newtodo.value
+          }
+          //图片位置
+          if (properties.newimageheight){
+            this.topNumber = properties.newimageheight.value
+          }
         },
     }
   }
@@ -358,6 +528,74 @@ export default {
   overflow: hidden;
   /*background-image: linear-gradient(to left top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);*/
 }
+.imageInput{
+  display: none;
+}
+
+.imageInputButton{
+  position: absolute;
+  display: flex;
+  align-items: center;
+  top: 14%;
+  right: 30px;
+  z-index: 3;
+  height: 30px;
+  width: 120px;
+  border-radius: 4px 0 4px 4px;
+  border: solid 1px rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: 0.5s;
+}
+.imageInputButton:hover{
+  background:rgba(255, 255, 255, 0.05);
+}
+.imageInputButton i:hover{
+  background: rgb(147, 117, 149);
+}
+.imageInputButton span:hover{
+  color: rgba(255, 255, 255, 0.8);
+}
+.newImageDelete{
+  position: absolute;
+  top: -32px;
+  left: 29px;
+  height: 30px;
+  width: 90px;
+  line-height: 30px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  border-radius: 4px 4px 0 0 ;
+  border: solid 1px rgba(255, 255, 255, 0.1);
+  transition: 0.8s;
+}
+.newImageDelete:hover{
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(245, 114, 114, 0.48);
+}
+.imageInputButton i{
+  display: block;
+  height: 30px;
+  width: 30px;
+  border-radius: 4px;
+  background: rgb(208, 164, 212);
+  font-size: 24px;
+  line-height: 30px;
+  transition: 0.7s;
+}
+.imageInputButton span{
+  display: block;
+  width: 90px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  transition: 0.5s;
+}
+#img{
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  transition:top 0.3s;
+}
 .list{
   position: absolute;
   height: 80px;
@@ -366,8 +604,9 @@ export default {
   left: calc(50% - 40px);
   line-height: 80px;
   transition: 0.5s;
+  z-index: 1;
 }
-.iconfont{
+.musicIcon{
   display: block;
   position: absolute;
   height: 100%;
@@ -510,6 +749,7 @@ export default {
   width: 1000px;
   border: rgba(0, 0, 0, 0.3) solid 2px;
   border-radius: 8px;
+  z-index: 1;
 
 }
 .mouseTips{
@@ -541,5 +781,119 @@ export default {
   right: calc(50% - 30px);
   border-left: rgba(0, 0, 0, 0.1) solid 1px;
   border-top: rgba(0, 0, 0, 0.1) solid 1px;
+}
+
+
+/*todo相关*/
+
+.todoBox{
+  position: absolute;
+  z-index: 3;
+  top: 20%;
+  right: 30px;
+  min-width: 240px;
+  max-width: 300px;
+  transition: 0.5s;
+
+}
+.rotate{
+  transform-origin: calc(100% - 19px) 15px;
+  transform: rotate(-90deg);
+}
+.todoCardChecked{
+  position: absolute;
+  top: 0;
+  right: 4px;
+  display: block;
+  height: 26px;
+  width: 26px;
+  border-radius: 50%;
+  line-height: 26px;
+  border: rgba(0,0,0,0.5) solid 2px;
+  transition: 0.8s;
+}
+.iconRotate{
+    transform: rotate(90deg);
+}
+.todoTitleText{
+  height: 30px;
+  margin-left: 25px;
+  font-size: 24px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.5);
+}
+.operateBox{
+  display: flex;
+  justify-content: space-between;
+  margin: 36px 0 10px 0;
+}
+.operateBox div:first-child{
+  height: 30px;
+  width: 60%;
+  line-height: 30px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  font-size: 14px;
+  color: rgba(0,0,0,0.3);
+  border: rgba(255, 255, 255, 0.1) solid 1px;
+  cursor: default;
+}
+.buttonBox{
+  display: flex;
+}
+.buttonBox button{
+  padding: 0 5px 0 5px;
+  margin-left: 5px;
+  border-radius: 4px;
+  background: rgb(208, 164, 212);
+  border: none;
+  color: rgba(0,0,0,0.5);
+  cursor: pointer;
+}
+.buttonBox button:hover{
+  background: rgb(147, 117, 149);
+  color: rgba(0,0,0,0.8)
+}
+.todoListBox ul{
+  box-sizing: border-box;
+}
+.todoLiBox{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 5px;
+  border: rgba(255, 255, 255, 0.1) solid 1px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 5px 3px 5px 5px;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+.todoCheckedBox{
+  height: 20px;
+  width: 20px;
+  border:rgba(0,0,0,0.5) solid 2px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+.todoText{
+  font-size: 14px;
+  color: rgba(0,0,0,0.6);
+  margin: 0 5px 0 5px;
+  cursor: default;
+}
+.todoDelete{
+  height: 30px;
+  width: 60px;
+  border-radius: 4px;
+  background: rgba(198, 70, 103, 0.5);
+  line-height: 30px;
+  font-size: 14px;
+  color: rgba(0,0,0,0.5);
+  cursor: pointer;
+}
+.todoDelete:hover{
+  background: rgba(198, 70, 103, 0.7);
+  color: rgba(0,0,0,0.8);
 }
 </style>

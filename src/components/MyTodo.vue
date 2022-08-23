@@ -7,7 +7,7 @@
       <div>{{myTodo.todo}}</div>
       <div class="buttonBox">
         <button type="button" @click="newTodo">添加</button>
-        <button type="button" @dblclick="clearData">重置</button>
+        <button type="button" @click="clearData">重置</button>
       </div>
 
     </div>
@@ -16,7 +16,7 @@
       <li class="todoLiBox" v-for="todoList in todoListP" :key="todoList.id">
         <div class="todoCheckedBox" @click="todoChecked(todoList.id)" ref="todoCheckedBox"></div>
         <div class="todoText">{{todoList.todo}}</div>
-        <div class="todoDelete" @dblclick="todoDelete(todoList.id)">删除</div>
+        <div class="todoDelete" @click="todoDelete(todoList.id)">删除</div>
       </li>
     </ul>
   </div>
@@ -122,7 +122,7 @@ export default {
      window.wallpaperPropertyListener = {
         applyUserProperties: (properties) =>{
           if (properties.ceshishuju){
-            this.myTodo = properties.ceshishuju.value
+            this.myTodo.todo = properties.ceshishuju.value
           }
         }
      }

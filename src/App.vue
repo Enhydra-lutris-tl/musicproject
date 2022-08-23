@@ -1,16 +1,13 @@
 <template>
   <MusicList></MusicList>
-  <MyTodo></MyTodo>
 </template>
 
 <script>
 import MusicList from './components/MusicList.vue'
-import MyTodo from "@/components/MyTodo";
 
 export default {
   name: 'App',
   components: {
-    MyTodo,
     MusicList,
   }
 }

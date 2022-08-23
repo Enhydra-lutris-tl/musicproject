@@ -6,6 +6,13 @@
   "description": "音乐项目相关",
   "glyphs": [
     {
+      "icon_id": "8777165",
+      "name": "image",
+      "font_class": "icon-test2",
+      "unicode": "e64a",
+      "unicode_decimal": 58954
+    },
+    {
       "icon_id": "8776784",
       "name": "order",
       "font_class": "icon-test",
