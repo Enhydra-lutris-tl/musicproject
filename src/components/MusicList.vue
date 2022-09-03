@@ -5,7 +5,7 @@
     <div class="newImageDelete" ref="newImageDelete" @click="newImageDeleted">清除背景</div>
     <i class="iconfont icon-icon-test2" @click="toImgInput"></i><span @click="toImgInput">修改背景</span></div>
   <img :src="imgSrc" alt="111111" id="img" ref="backImg" v-show="imgSrc" :style="{top:imgHeight*(topNumber/100)*-1 + 'px'}">
-  <canvas id="canvasBack"></canvas>
+  <canvas id="canvasBack" :style="{position:'absolute',transition:'top 0.5s',top:imgHeight*(topNumber/100)*-1 + 'px',left:'0'}"></canvas>
   <div class="dateList">
     <div class="nowTime">{{nowDate['nowTime']}}</div>
     <div class="nowDate">{{nowDate['nowDate']}}</div>
@@ -74,7 +74,7 @@ export default {
   name: "MusicList",
   data(){
     return{
-      topNumber:1,
+      topNumber:0,
       imgHeight:'',
       tipShow:false,
       nowDate: {nowTime:'',nowDate:''},
@@ -296,6 +296,7 @@ export default {
     toImgInput(){
       this.$refs.imageInput.click()
     },
+    // todo 更换壁纸后需要增加更新操作
     imgInput(){
       const file = this.$refs.imageInput.files[0]
       const fr = new FileReader()
@@ -318,19 +319,23 @@ export default {
     // 调整画布尺寸
     drawBack(cx,cy){
       var canvas = document.getElementById('canvasBack')
-      canvas.height = document.documentElement.clientHeight
       canvas.width = document.documentElement.clientWidth
+      canvas.height = canvas.width*this.imgRatio
+
       this.$refs.backImg.width = canvas.width
       this.$refs.backImg.height = canvas.width*this.imgRatio
-      this.imgHeight = canvas.width*this.imgRatio - canvas.height
+      // 可移动高度
+      this.imgHeight = canvas.width*this.imgRatio - document.documentElement.clientHeight
       var ctx = canvas.getContext('2d')
       // 清除画布内容，防止拉伸
       ctx.clearRect(0,0,canvas.width,canvas.height)
-      var grd = ctx.createLinearGradient(0,0,canvas.width,canvas.height,)
-      grd.addColorStop(0,'#5FFBF1')
-      grd.addColorStop(1,'#D16BA5')
-      ctx.fillStyle=grd;
-      ctx.fillRect(0,0,canvas.width,canvas.height)
+      // var grd = ctx.createLinearGradient(0,0,canvas.width,canvas.height,)
+      // grd.addColorStop(0,'#5FFBF1')
+      // grd.addColorStop(1,'#D16BA5')
+      // ctx.fillStyle=grd;
+      // ctx.fillRect(0,0,canvas.width,canvas.height)
+      var img = document.getElementById('img')
+      ctx.drawImage(img,0,0,canvas.width,canvas.height)
       var a = ctx.getImageData(cx,cy,1,1).data
       this.canvasColor = `rgba(${a[0] - 30},${a[1] - 20},${a[2] - 20},${a[3]})`
     },
@@ -593,7 +598,7 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: -2;
   transition:top 0.3s;
 }
 .list{
@@ -799,6 +804,7 @@ export default {
 .rotate{
   transform-origin: calc(100% - 19px) 15px;
   transform: rotate(-90deg);
+  right:0;
 }
 .todoCardChecked{
   position: absolute;
